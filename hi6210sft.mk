@@ -2,6 +2,10 @@
 PRODUCT_AAPT_CONFIG := xhdpi hdpi normal
 PRODUCT_AAPT_PREF_CONFIG := xhdpi
 
+# Blobs
+$(call inherit-product, vendor/huawei/hi6210sft/hi6210sft-vendor.mk)
+PRODUCT_RESTRICT_VENDOR_FILES := false
+
 # Dalvik
 $(call inherit-product, frameworks/native/build/phone-xhdpi-2048-dalvik-heap.mk)
 
