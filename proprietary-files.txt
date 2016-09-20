@@ -4,4 +4,4 @@ lib/hw/gralloc.hi6210sft.so
 
 lib64/egl/libGLES_android.so
 lib64/egl/libGLES_mali.so
-llib64ib/hw/gralloc.hi6210sft.so
+lib64/hw/gralloc.hi6210sft.so
