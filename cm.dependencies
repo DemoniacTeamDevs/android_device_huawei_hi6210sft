@@ -6,5 +6,5 @@
  {
    "repository": "android_vendor_huawei_hi6210sft",
    "target_path": "vendor/huawei/hi6210sft"
- },
+ }
 ]
