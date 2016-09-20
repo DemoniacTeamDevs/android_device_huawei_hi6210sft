@@ -62,6 +62,22 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
 	lights.default
 
+# NFC
+PRODUCT_COPY_FILES += \
+        $(LOCAL_PATH)/nfc/bcm2079x_firmware.ncd:system/vendor/firmware/bcm2079x_firmware.ncd \
+        $(LOCAL_PATH)/nfc/bcm2079x_pre_firmware.ncd:system/vendor/firmware/bcm2079x_pre_firmware.ncd
+
+PRODUCT_PACKAGES += \
+    	NfcNci \
+    	Tag \
+    	com.android.nfc_extras \
+	nfc_nci.pn54x.default
+
+PRODUCT_COPY_FILES += \
+    	frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
+    	frameworks/native/data/etc/android.hardware.nfc.hce.xml:system/etc/permissions/android.hardware.nfc.hce.xml \
+	frameworks/native/data/etc/com.android.nfc_extras.xml:system/etc/permissions/com.android.nfc_extras.xml
+
 # Overlay
 DEVICE_PACKAGE_OVERLAYS := device/huawei/hi6210sft/overlay
 
