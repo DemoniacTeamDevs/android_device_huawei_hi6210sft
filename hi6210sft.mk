@@ -140,14 +140,14 @@ PRODUCT_COPY_FILES+= \
         $(LOCAL_PATH)/ramdisk/ueventd.hi6210sft.rc:root/ueventd.hi6210sft.rc \
 
 PRODUCT_COPY_FILES+= \
-        $(LOCAL_PATH)/ramdisk/sbin/check_root:root/check_root \
-        $(LOCAL_PATH)/ramdisk/sbin/e2fsck_s:root/e2fsck_s \
-        $(LOCAL_PATH)/ramdisk/sbin/emmc_partation:root/emmc_partation \
-        $(LOCAL_PATH)/ramdisk/sbin/kmsgcat:root/kmsgcat \
-        $(LOCAL_PATH)/ramdisk/sbin/logctl_service:root/logctl_service \
-        $(LOCAL_PATH)/ramdisk/sbin/ntfs-3gd:root/ntfs-3gd \
-        $(LOCAL_PATH)/ramdisk/sbin/oeminfo_nvm_server:root/oeminfo_nvm_server \
-        $(LOCAL_PATH)/ramdisk/sbin/teecd:root/teecd \
+        $(LOCAL_PATH)/ramdisk/sbin/check_root:root/sbin/check_root \
+        $(LOCAL_PATH)/ramdisk/sbin/e2fsck_s:root/sbin/e2fsck_s \
+        $(LOCAL_PATH)/ramdisk/sbin/emmc_partation:root/sbin/emmc_partation \
+        $(LOCAL_PATH)/ramdisk/sbin/kmsgcat:root/sbin/kmsgcat \
+        $(LOCAL_PATH)/ramdisk/sbin/logctl_service:root/sbin/logctl_service \
+        $(LOCAL_PATH)/ramdisk/sbin/ntfs-3gd:root/sbin/ntfs-3gd \
+        $(LOCAL_PATH)/ramdisk/sbin/oeminfo_nvm_server:root/sbin/oeminfo_nvm_server \
+        $(LOCAL_PATH)/ramdisk/sbin/teecd:root/sbin/teecd \
 
 # USB
 PRODUCT_PACKAGES += \
