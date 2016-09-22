@@ -8,6 +8,21 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_AAPT_CONFIG := xhdpi hdpi normal
 PRODUCT_AAPT_PREF_CONFIG := xhdpi
 
+# Audio
+PRODUCT_PACKAGES += \
+    	audio.a2dp.default \
+    	audio_policy.stub \
+    	audio.primary.default \
+    	audio.r_submix.default \
+    	audio.usb.default \
+    	sound_trigger.primary.hi6210sft \
+    	libaudioutils \
+    	libtinyalsa \
+    	tinycap \
+    	tinymix \
+    	tinypcminfo \
+    	tinyplay
+
 # Blobs
 $(call inherit-product, vendor/huawei/hi6210sft/hi6210sft-vendor.mk)
 PRODUCT_RESTRICT_VENDOR_FILES := false
@@ -148,6 +163,7 @@ PRODUCT_COPY_FILES+= \
         $(LOCAL_PATH)/ramdisk/sbin/ntfs-3gd:root/sbin/ntfs-3gd \
         $(LOCAL_PATH)/ramdisk/sbin/oeminfo_nvm_server:root/sbin/oeminfo_nvm_server \
         $(LOCAL_PATH)/ramdisk/sbin/teecd:root/sbin/teecd \
+
 # USB
 PRODUCT_PACKAGES += \
  	com.android.future.usb.accessory
