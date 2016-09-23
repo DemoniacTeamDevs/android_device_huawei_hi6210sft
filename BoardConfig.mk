@@ -50,6 +50,21 @@ TARGET_HARDWARE_3D := true
 USE_OPENGL_RENDERER := true
 WITH_DEXPREOPT ?= true
 
+# Kernel
+BOARD_KERNEL_CMDLINE := hisi_dma_print=0 vmalloc=384M maxcpus=8 coherent_pool=512K no_irq_affinity androidboot.selinux=disabled ate_enable=true
+
+BOARD_KERNEL_BASE     := 0x07478000
+BOARD_KERNEL_PAGESIZE := 2048
+BOARD_KERNEL_OFFSET   := 0x00008000
+BOARD_RAMDISK_OFFSET  := 0x07b88000
+BOARD_TAGS_OFFSET     := 0x02988000
+
+BOARD_MKBOOTIMG_ARGS += --kernel_offset "$(BOARD_KERNEL_OFFSET)"
+BOARD_MKBOOTIMG_ARGS += --ramdisk_offset "$(BOARD_RAMDISK_OFFSET)"
+BOARD_MKBOOTIMG_ARGS += --tags_offset "$(BOARD_TAGS_OFFSET)"
+
+TARGET_PREBUILT_KERNEL := device/huawei/hi6210sft/kernel
+
 # Partitions
 BOARD_BOOTIMAGE_PARTITION_SIZE := 25165824
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
