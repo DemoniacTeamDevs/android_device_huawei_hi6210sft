@@ -33,6 +33,14 @@ PRODUCT_COPY_FILES += \
         $(LOCAL_PATH)/graphics/lib/egl/libGLES_mali.so:system/lib/egl/libGLES_mali.so \
         $(LOCAL_PATH)/graphics/lib64/egl/libGLES_mali.so:system/lib64/egl/libGLES_mali.so \
 
+PRODUCT_PROPERTY_OVERRIDES += \
+    	debug.hwui.render_dirty_regions=false \
+ 		hw.lcd.lcd_density=320 \
+		persist.sys.strictmode.disable=1 \
+    	persist.sys.use_dithering=2 \
+    	ro.opengles.version=131072 \
+		ro.sf.lcd_density=320
+
 # Kernel
 ifeq ($(TARGET_PREBUILT_KERNEL),)
 LOCAL_KERNEL := device/huawei/hi6210sft/kernel
