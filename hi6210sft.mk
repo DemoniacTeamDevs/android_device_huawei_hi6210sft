@@ -22,6 +22,9 @@ PRODUCT_PACKAGES += \
 # Dalvik
 $(call inherit-product-if-exists, frameworks/native/build/tablet-10in-xhdpi-2048-dalvik-heap.mk)
 
+# GPS
+$(call inherit-product, device/common/gps/gps_us_supl.mk)
+
 # Graphics
 PRODUCT_PACKAGES += \
 		gralloc.hi6210sft \
