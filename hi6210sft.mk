@@ -1,7 +1,7 @@
 # Android Open Source Projects
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
 
-PRODUCT_NAME := hi6210sft
+PRODUCT_NAME := cm_hi6210sft
 PRODUCT_DEVICE := hi6210sft
 PRODUCT_BRAND := hi6210sft
 
