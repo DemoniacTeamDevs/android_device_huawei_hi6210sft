@@ -1,61 +1,36 @@
+import /init.tee.rc
 
-on early-init
-test
 
-    export SECONDARY_STORAGE /storage/sdcard1
-    mkdir /mnt/shell 0710 shell shell
-    mkdir /storage 0555 root sdcard_r
-    mkdir /mnt/shell/emulated 0700 shell shell
-    mkdir /storage/emulated 0555 root root
-
-    export EXTERNAL_STORAGE /storage/emulated/0
-    export EMULATED_STORAGE_SOURCE /mnt/shell/emulated
-    export EMULATED_STORAGE_TARGET /storage/emulated
-
-    symlink /storage/emulated/0 /sdcard
-    symlink /storage/emulated/0 /mnt/sdcard
-    symlink /storage/emulated/0 /storage/sdcard0
-    symlink /storage/emulated/0 /storage/emulated/legacy
-    symlink /mnt/shell/emulated/0 /storage/emulated/0
-
-    mkdir /mnt/media_rw 0700 media_rw media_rw
-    mkdir /mnt/media_rw/sdcard1 0700 media_rw media_rw
-    mkdir /storage/sdcard1 0700 root root
-    mkdir /mnt/media_rw/usbotg 0700 media_rw media_rw
-    mkdir /storage/usbotg 0700 root root
-
+on early-boot
+    symlink /sdcard /mnt/sdcard
+    symlink /storage/self/primary /storage/sdcard0
+    mkdir /mnt/media_rw 0750 media_rw media_rw
     mkdir /mnt/pstore 0770 root system
     mount pstore pstore /mnt/pstore
 
 on charger
-    mount ext4 /dev/block/mmcblk0p38 /system ro
-    mount ext4 /dev/block/mmcblk0p40 /data nosuid nodev noatime wait crypt discard,noauto_da_alloc,mblk_io_submit,data=ordered
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor optdemand
-
-on early-fs
-    fix_ext4
-    wait /dev/block/platform/hi_mci.0/by-name/oeminfo
-    start oeminfo_nvm
 
 on fs
     setprop ro.crypto.fuse_sdcard true
     symlink /splash2/fac_log /data/log/fac_log
     mount ext4 /dev/block/mmcblk0p34 /cache nosuid nodev noatime wait crypt discard,noauto_da_alloc,data=ordered,user_xattr,discard,barrier=1
-
+	
     wait /dev/block/mmcblk0p38
     mount ext4 /dev/block/mmcblk0p38 /system ro
 
     wait /dev/block/mmcblk0p40
-    mount ext4 /dev/block/mmcblk0p40 /data nosuid nodev noatime wait crypt discard,noauto_da_alloc,mblk_io_submit,data=ordered
+    mount_all /fstab.${ro.hardware}
     
     mount ext4 /dev/block/platform/hi_mci.0/by-name/cust /cust wait ro nosuid nodev
 
     wait /dev/block/platform/hi_mci.0/by-name/oeminfo
     start oeminfo_nvm
 
-    chmod 0771 /mnvm1:0
-    chmod 0771 /mnvm2:0
-    chmod 0771 /mnvm3:0
+
+    chmod 0774 /mnvm1:0
+    chmod 0774 /mnvm2:0
+    chmod 0774 /mnvm3:0
     chmod 0774 /dsp:0
 	
     chown root root /mnvm1:0
@@ -63,24 +38,14 @@ on fs
     chown root root /mnvm3:0
     chown root root /dsp:0
 
-    mount ext4 /dev/block/platform/hi_mci.0/by-name/cust /cust wait ro nosuid nodev
-    mount_doul vfat-ext4 /dev/block/platform/hi_mci.0/by-name/splash2 /splash2 wait rw nosuid nodev uid=1000,gid=1000,fmask=0002,dmask=0002,context=u:object_r:splash2_data_file:s0
-    mount ext4 /dev/block/platform/hi_mci.0/by-name/3rdmodem /3rdmodem noatime nosuid nodev
-    mount ext4 /dev/block/platform/hi_mci.0/by-name/3rdmodemnvm /3rdmodemnvm noatime nosuid nodev context=u:object_r:radio_data_file:s0
-    mount ext4 /dev/block/platform/hi_mci.0/by-name/3rdmodemnvmback /3rdmodemnvmbkp noatime nosuid nodev context=u:object_r:radio_data_file:s0
+on post-fs-data
+    mkdir /data/media 0770 media_rw media_rw
 
-    mkdir /data/log 0755 system log
-    mkdir /splash2/log 0775 system log
-    symlink /splash2/fac_log /data/log/fac_log
-    symlink /splash2 /log
+    mount sdcardfs /data/media /mnt/shell/emulated nosuid nodev derive=legacy,reserved_mb=20
 
-    wait /dev/block/mmcblk0p35
-    chown system system /dev/block/mmcblk0p35
-    chmod 0660 /dev/block/mmcblk0p35
-
-    wait /dev/block/mmcblk0p36
-    chown system system /dev/block/mmcblk0p36
-    chmod 0660 /dev/block/mmcblk0p36
+    mkdir /data/share 0775 sdcard_rw sdcard_rw
+    chown sdcard_rw sdcard_rw /data/share
+    mount sdcardfs /data/share /mnt/shell/emulated
 
 on early-boot
     chown system system /dev/memory_throughput
@@ -104,7 +69,6 @@ on early-boot
     chown system system /sys/class/devfreq/gpufreq/cur_freq
     chmod 664 /sys/class/devfreq/gpufreq/cur_freq
 	
-    mount debugfs /sys/kernel/debug /sys/kernel/debug mode=0775,gid=1000
 
 on init
 
@@ -120,13 +84,6 @@ on init
 
     symlink /splash2 /log
 
-    mkdir /mnt/secure 0700 root root
-    mount tmpfs tmpfs /mnt/secure mode=0700,uid=0,gid=0
-
-    mkdir /mnt/secure/staging 0700 root root
-
-    mkdir /mnt/secure/asec  0700 root root
-	
     write /proc/sys/kernel/dmesg_restrict 1
 	
     chown system system /dev/memsetdev
@@ -149,33 +106,27 @@ on init
     chown system system /dev/log/switch
     chmod 0660 /dev/log/switch
 
+
+
+
+
     write /sys/module/block2mtd/parameters/block2mtd /dev/block/mmcblk0p19
         
-    mount ext4 /dev/block/mmcblk0p12 /mnvm3:0 nosuid nodev noatime wait crypt discard,noauto_da_alloc,data=ordered,user_xattr,discard,barrier=1
-    mount ext4 /dev/block/mmcblk0p17 /modem_log nosuid nodev noatime wait crypt discard,noauto_da_alloc,data=ordered,user_xattr,discard,barrier=1
+    mount ext4 /dev/block/mmcblk0p12 /mnvm3:0 nosuid nodev noatime wait crypt discard,noauto_da_alloc,data=ordered,user_xattr,discard,barrier=1,context=u:object_r:modem_nv_file:s0
+    mount ext4 /dev/block/mmcblk0p17 /modem_log nosuid nodev noatime wait crypt discard,noauto_da_alloc,data=ordered,user_xattr,discard,barrier=1,context=u:object_r:modem_log_file:s0
     wait /dev/block/mmcblk0p11
     fix_ext4 /sbin/e2fsck_s /dev/block/mmcblk0p11
-    mount ext4 /dev/block/mmcblk0p11 /mnvm2:0 nosuid nodev noatime
+    mount ext4 /dev/block/mmcblk0p11 /mnvm2:0 nosuid nodev noatime context=u:object_r:modem_nv_file:s0
 
     chmod 0774 /mnvm2:0
     chown root root /mnvm2:0
     write /proc/modem_depend 1
-
-    mkdir /dev/frz
-    mount cgroup none /dev/frz freezer
-
-    mkdir /cust
-    mkdir /splash2
-    mkdir /3rdmodem
-    mkdir /3rdmodemnvm
-    mkdir /3rdmodemnvmbkp
 
 on post-fs
 
     chown system system /splash2
     chmod 0775 /splash2
     mkdir /splash2/log 0775 system system
-	mkdir /data/anr 0775 system system
 	
     mount tmpfs tmpfs /mnt/secure private rec
 	
@@ -192,21 +143,13 @@ on post-fs
     mkdir /data/modemlog/DrvLog 0755 root root
     mkdir /data/modemlog/Exc 0755 root root
     mkdir /data/modemlog/Log 0755 root root
-
-    mkdir /data/sec_storage
-    mount ext4 /dev/block/platform/hi_mci.0/by-name/securetystorage /data/sec_storage nosuid nodev noatime wait crypt discard,auto_da_alloc,mblk_io_submit,data=journal,context=u:object_r:teecd_data_file:s0
-    chown root root /data/sec_storage
-    chmod 600 /data/sec_storage
-
-	sys_wp_init_action
-
-on post-fs-data
-
-    mkdir /data/hwzd_logs
-    chmod 0775 /data/hwzd_logs
-    chown system system /data/hwzd_logs
+    restorecon_recursive /splash2
 	
 on boot
+
+
+
+    mount debugfs /sys/kernel/debug /sys/kernel/debug mode=0755
 
     chown system system /sys/class/leds/lcd_backlight0/brightness
     chown system system /sys/class/leds/torch/brightness
@@ -270,6 +213,15 @@ on boot
     chown system system /sys/bus/i2c/devices/2-0038/enable_als_sensor
     chown system system /sys/bus/i2c/devices/2-0038/als_poll_delay
     chown system system /sys/hall/hall_sensor
+	chown system system /sys/class/sensors/als_sensor/enable
+	chown system system /sys/class/sensors/als_sensor/set_delay
+	chown system system /sys/class/sensors/ps_sensor/enable
+	chown system system /sys/class/sensors/acc_sensor/enable
+	chown system system /sys/class/sensors/acc_sensor/set_delay
+	chown system system /sys/class/sensors/mag_sensor/enable
+	chown system system /sys/class/sensors/mag_sensor/set_delay
+	chown system system /sys/class/sensors/mag_sensor/self_test
+	chown system system /sys/class/sensors/hall_sensor/enable
     chown system system /sys/class/compass/akm09911/accel
     chown system system /sys/class/compass/akm09911/compass_info
     chown system system /sys/class/compass/akm09911/delay_acc
@@ -302,6 +254,8 @@ on boot
     chown system system /sys/module/sensor_info/parameters/compass_debug
     chown system system /sys/module/sensor_info/parameters/gs_debug
     chown system system /sys/module/sensor_info/parameters/hall_debug
+    chmod 664 /sys/bus/i2c/drivers/apds990x/2-0039/ps_phone_status
+    chown radio radio /sys/bus/i2c/drivers/apds990x/2-0039/ps_phone_status
 
     chown system system /sys/bus/platform/devices/huawei_touch/calibrate
     chown system system /sys/bus/platform/devices/huawei_touch/touch_chip_info
@@ -323,29 +277,15 @@ on boot
     chown system system /sys/touchscreen/response
     chown system system /sys/touchscreen/status
 
-	chown system system /sys/kernel/debug/mit1_gpu_dfs_lock
 
-    mkdir /data/media 0770 media_rw media_rw
-    wait /data/media/0
-    mount sdcardfs /data/media /mnt/shell/emulated nosuid nodev derive=legacy,reserved_mb=20
-
-    chmod 0775 /data/media/0
-    chmod 0775 /data/media/0/Music
-    chmod 0775 /data/media/0/Movies
-    chmod 0775 /data/media/0/Pictures
-    chown media_rw media_rw /data/media/0
-    chown media_rw media_rw /data/media/0/Music
-    chown media_rw media_rw /data/media/0/Movies
-    chown media_rw media_rw /data/media/0/Pictures
-
-    write /proc/sys/kernel/hung_task_panic 0
+    write /proc/sys/kernel/hung_task_panic 1
     write /proc/sys/kernel/hung_task_timeout_secs 120
     write /sys/kernel/hungtask/monitorlist "whitelist,system_server,surfaceflinger"
     write /sys/kernel/hungtask/enable "on"
 
      write /proc/sys/net/core/rps_sock_flow_entries 0
      write /sys/class/net/rmnet0/queues/rx-0/rps_flow_cnt 0
-     write /sys/class/net/rmnet0/queues/rx-0/rps_cpus  f
+     write /sys/class/net/rmnet0/queues/rx-0/rps_cpus f
      write /sys/class/net/rmnet1/queues/rx-0/rps_flow_cnt 0
      write /sys/class/net/rmnet1/queues/rx-0/rps_cpus f
      write /sys/class/net/rmnet2/queues/rx-0/rps_flow_cnt 0
@@ -354,100 +294,24 @@ on boot
      write /sys/class/net/rmnet3/queues/rx-0/rps_cpus f
      write /sys/class/net/rmnet4/queues/rx-0/rps_flow_cnt 0
      write /sys/class/net/rmnet4/queues/rx-0/rps_cpus f
-	 write /sys/class/net/rmnet_ims/queues/rx-0/rps_flow_cnt 0
+     write /sys/class/net/rmnet_ims/queues/rx-0/rps_flow_cnt 0
      write /sys/class/net/rmnet_ims/queues/rx-0/rps_cpus f
+	 
+    write /sys/block/zram0/disksize 268435456
+    swapon_all fstab.hi6210sft
 
-    start logctl_service
-    chmod 0660 /dev/hwlog_switch
-    chown logd system /dev/hwlog_switch
-    chmod 0660 /dev/hwlog_tag
-    chown system system /dev/hwlog_tag
+on property:ro.runmode=*
+    start ccorecat
 
-    chmod 0660 /sys/class/hw_power/charger/charge_data/enable_charger
-    chown system system /sys/class/hw_power/charger/charge_data/enable_charger
-    chmod 0660 /sys/class/hw_power/charger/charge_data/iin_thermal
-    chown system system /sys/class/hw_power/charger/charge_data/iin_thermal
-    chmod 0660 /sys/class/hw_power/charger/charge_data/ichg_thermal
-    chown system system /sys/class/hw_power/charger/charge_data/ichg_thermal
-    chmod 0660 /sys/class/hw_power/charger/charge_data/regulation_voltage
-    chown system system /sys/class/hw_power/charger/charge_data/regulation_voltage
-    chmod 0660 /sys/class/hw_power/charger/charge_data/iin_runningtest
-    chown system system /sys/class/hw_power/charger/charge_data/iin_runningtest
-    chmod 0660 /sys/class/hw_power/charger/charge_data/ichg_runningtest
-    chown system system /sys/class/hw_power/charger/charge_data/ichg_runningtest
-    chown system system /sys/class/hisi_usb_class/hisi_usb_dev/interface/release_wakelock
-    chmod 0660 /sys/class/hisi_usb_class/hisi_usb_dev/interface/release_wakelock
-    chmod 0660 /sys/class/hw_power/charger/charge_data/enable_hiz
-    chown system system /sys/class/hw_power/charger/charge_data/enable_hiz
-    chmod 0660 /sys/class/hw_power/charger/charge_data/shutdown_watchdog
-    chown system system /sys/class/hw_power/charger/charge_data/shutdown_watchdog
+on property:ro.runmode=*
+    start telemntncat
 
-service check_root /sbin/check_root
+service kerneldump /system/etc/kerneldump.sh
     class main
+    user root
+    group system
     oneshot
-    seclabel u:r:check_root:s0
-
-service kmsglogcat /sbin/kmsgcat -r 4096 -z 5 -n 5 -f /data/android_logs/kmsgcat-log
-    class late_start
-    user root
-    group system
-    disabled
-    seclabel u:r:hisilogcat:s
-
-service logctl_service /sbin/logctl_service -m 1
-    class late_start
-    user root
-    group system
-    seclabel u:r:hisilogcat:s0
-
-service oeminfo_nvm /sbin/oeminfo_nvm_server
-    class core
-    critical
-    ioprio rt 4
-    seclabel u:r:oeminfo_nvm:s0
-
-service teecd /sbin/teecd
-    class main
-    user root
-    group root
-    seclabel u:r:teecd:s0
-
-service akmd09911 /system/bin/akmd09911
-    class main
-    user system
-    group system
-
-service atcmdserver  /system/bin/atcmdserver
-    class main
-    disabled
-
-service bastetd /system/bin/bastetd
-    class main
-    user root
-    group root
-    disabled
-
-service chargelogcat /system/bin/chargelogcat -r 4096 -n 5 -z 5 -t 5 -p /data/android_logs/
-    class late_start
-    user root
-    group system
-    disabled
-    seclabel u:r:hisilogcat:s0
-
-
-
-service check_longpress /system/bin/check_longpress
-    class main
-    oneshot
-
-service data_cleanner /system/bin/data_cleaner
-    class core
-    oneshot
-
-service diagserver /system/bin/diagserver
-    class main
-    user root
-
+    
 service ccorecat /system/bin/dmesgcat -i /dev/log/ccore -e s -r 4096 -z 2 -n 5 -f /data/hisi_logs/cp_log/coredump/ccorecat-log
     class late_start
     user root
@@ -460,159 +324,17 @@ service telemntncat /system/bin/dmesgcat -i /proc/telemntn -e b -r 10240 -z 3 -n
     group system
     disabled
 
-service ddrtest /system/bin/do_ddrtest
-    user root
-    disabled
-    oneshot
-
-service stop_ddrtest /system/bin/do_ddrtest
-    user root
-    disabled
-    oneshot
-
-service inputlogcat /system/bin/eventcat -lrt -k 1024 -z 8 -m 10 -f /data/android_logs/input-log
-    class late_start
-    user root
-    group system
-    disabled
-    seclabel u:r:hisilogcat:s0
-
-service fac_log_service /system/bin/factory_log_service -m 1
-    class late_start
-    user root
-    group system
-    disabled
-    oneshot
-    seclabel u:r:hisilogcat:s0
-
-service goldeneye /system/bin/goldeneye
-    class main
-    user root
-
-service hwnffserver  /system/bin/hwnffserver
-    class main
-    socket hwnff stream 0660 root mount
-
-service hw_cdma_service /system/bin/hw_cdmamodem_service /dev/acm_cdma_log /dev/ttySPI3 /dev/ttySPI1
-    class main
-    user root
-    disabled
-
-service hwpged /system/bin/hwpged
-    class main
-    socket MsgHubSock stream 0660 root system
-    user root
-
-service ioinfoservice /system/bin/ioinfoservice
-    class main
-
-service jankservice /system/bin/jankservice
-    disabled
-    class main
-
-service applogcat /system/bin/logcat -v threadtime -r4096 -z 10 -n 5 -f /data/android_logs/applogcat-log
-    class late_start
-    user root
-    group system
-    disabled
-    seclabel u:r:hisilogcat:s0
-
-service rillogcat /system/bin/logcat -b radio -v threadtime -r4096 -z 5 -n 5 -f /data/android_logs/rillogcat-log
-    class late_start
-    user root
-    group system
-    disabled
-    seclabel u:r:hisilogcat:s0
-
-service logserver /system/bin/logserver
-    class main
-    user root
-    group system
-    oneshot
-    seclabel u:r:logserver:s0
-
-service modemlogcat /system/bin/modemlogcat_lte -l
-    class main
-    user root
-    group system
-    disabled
-    oneshot
-
-service modematserver /system/bin/modemlogcat_lte -f hidp
-    class main
-    user root
-    group system
-    disabled
-    oneshot
-
-service sleeplogcat /system/bin/sleeplogcat -t 10 -p /data/android_logs/
-    class late_start
-    user root
-    group system
-    disabled
-    seclabel u:r:hisilogcat:s0
-
-service check_hota /system/bin/sh /system/etc/check_hota.sh
-    class core
-    oneshot
-
-service preparesdservice /system/bin/sh /system/bin/preparesd.sh
-   class main
-   disabled
-   oneshot
-   seclabel u:r:preparesd:s0
-
-service mapper /system/bin/sh /system/bin/mappersh
-    class late_start
-    user root
-    group system
-    disabled
-
-service thermal-daemon /system/bin/thermal-daemon
-    class main
-    user root
-    group root
-
+	
 service exch /system/etc/log/android_panic.sh
     class main
     user root
     group system
     oneshot
 
-service kerneldump /system/etc/kerneldump.sh
+service akmd09911 /system/bin/akmd09911
     class main
-    user root
+    user system
     group system
-    oneshot
-	 
-on property:ro.runmode=*
-    start ccorecat
-
-on property:ro.runmode=*
-    start telemntncat
-
-on property:debug.rt.ddr.test=1
-    stop ddrtest
-    start ddrtest
-on property:debug.rt.ddr.test=2
-    start ddrtest
-on property:debug.rt.ddr.test=3
-    start ddrtest
-on property:debug.rt.ddr.test=4
-    start stop_ddrtest
-
-on property:persist.sys.jankenable=true
-    start jankservice
-
-on property:persist.sys.primarysd=*
-   start preparesdservice
-
-on property:vold.decrypt=trigger_default_encryption
-    start surfaceflinger
-    start defaultcrypto
-
-on property:bastet.service.enable=true
-    start bastetd
 
 on property:service.bootanim.exit=1	
     write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor optdemand
@@ -621,66 +343,5 @@ on property:ro.runmode=factory
     chown system system /proc/balong/ddr_test/hisi_dt_on
     chown system system /proc/balong/ddr_test/hisi_dt_off
 
-on property:sys.boot_completed=1
-    start check_root
-
-on property:ro.runmode=factory
-    chmod 0775 /data/media/0/Music
-    chmod 0775 /data/media/0/Pictures
-    chown media_rw media_rw /data/media/0
-    chown media_rw media_rw /data/media/0/Music
-    chown media_rw media_rw /data/media/0/Pictures
-
-service fuse_sdcard1rw /system/bin/sdcard -u 1023 -g 1023 /mnt/media_rw/sdcard1 /storage/sdcard1
-   class late_start
-   disabled
-
-   service fuse_sdcard1 /system/bin/sdcard -u 1023 -g 1023 -w 1023 -d /mnt/media_rw/sdcard1 /storage/sdcard1
-   class late_start
-   disabled
-
-   service fuse_usbotg /system/bin/sdcard -u 1023 -g 1023 -w 1015 -d /mnt/media_rw/usbotg /storage/usbotg
-   class late_start
-   disabled
-
-on restart-sdcardfs
-    mkdir /data/media 0770 media_rw media_rw    
-    chown media_rw media_rw /data/media
-    mount sdcardfs /data/media /mnt/shell/emulated nosuid nodev derive=legacy,reserved_mb=20
-    
-on property:vold.decrypt=trigger_reset_main
-    class_reset main
-    class_reset late_start
-    write /sys/devices/platform/balong_power/state 10
-    setprop vold.crypto_support_innersd 1
-    
-on property:vold.decrypt=trigger_restart_min_framework
-    start teecd
-    class_start main
-
-on property:sys.printservice=*
-    printservice ${sys.printservice}
-
-on property:persist.sys.huawei.debug.on=1
-    start applogcat
-    start kmsglogcat
-    start rillogcat
-    start chargelogcat
-    start sleeplogcat
-    start inputlogcat
-
-on property:persist.sys.huawei.debug.on=0
-    stop applogcat
-    stop kmsglogcat
-    stop rillogcat
-    stop chargelogcat
-    stop sleeplogcat
-    stop inputlogcat
-
-on property:vold.decrypt=trigger_restart_framework
-    class_start main
-    class_start late_start
-    trigger restart-sdcardfs
-    setprop rild.rild1_ready_to_start ${rild.rild1_ready_to_start}
-    start gpsdaemon
-    exec /system/bin/start_110x_service.sh
+on late-init
+   rmdir /dev/cpuctl/top_visible
