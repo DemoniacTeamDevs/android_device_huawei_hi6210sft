@@ -30,7 +30,7 @@
 #include <cutils/properties.h>
 //#define LOG_NDEBUG 0
 
-#define LOG_TAG "HiKeyPowerHAL"
+#define LOG_TAG "HuaweiP8LitePowerHAL"
 #include <utils/Log.h>
 
 #include <hardware/hardware.h>
@@ -49,7 +49,7 @@
 #define SVELTE_MAX_FREQ_PROP "ro.config.svelte.max_cpu_freq"
 #define SVELTE_LOW_POWER_MAX_FREQ_PROP "ro.config.svelte.low_power_max_cpu_freq"
 
-struct hikey_power_module {
+struct hi6210sft_power_module {
     struct power_module base;
     pthread_mutex_t lock;
     /* interactive gov boost values */
@@ -110,7 +110,7 @@ static void nanosleep_ns(long long ns)
 }
 
 /*[interactive cpufreq gov funcs]*********************************************/
-static void interactive_power_init(struct hikey_power_module __unused *hikey)
+static void interactive_power_init(struct hi6210sft_power_module __unused *hi6210sft)
 {
     int32_t is_svelte = property_get_int32(SVELTE_PROP, 0);
 
@@ -157,25 +157,25 @@ static void power_set_interactive(struct power_module __unused *module, int on)
     ALOGV("power_set_interactive: %d done\n", on);
 }
 
-static int interactive_boostpulse(struct hikey_power_module *hikey)
+static int interactive_boostpulse(struct hi6210sft_power_module *hi6210sft)
 {
     char buf[80];
     int len;
 
-   if (hikey->boostpulse_fd < 0)
-        hikey->boostpulse_fd = open(INTERACTIVE_BOOSTPULSE_PATH, O_WRONLY);
+   if (hi6210sft->boostpulse_fd < 0)
+        hi6210sft->boostpulse_fd = open(INTERACTIVE_BOOSTPULSE_PATH, O_WRONLY);
 
-    if (hikey->boostpulse_fd < 0) {
-        if (!hikey->boostpulse_warned) {
+    if (hi6210sft->boostpulse_fd < 0) {
+        if (!hi6210sft->boostpulse_warned) {
             strerror_r(errno, buf, sizeof(buf));
             ALOGE("Error opening %s: %s\n", INTERACTIVE_BOOSTPULSE_PATH,
                       buf);
-            hikey->boostpulse_warned = 1;
+            hi6210sft->boostpulse_warned = 1;
         }
-        return hikey->boostpulse_fd;
+        return hi6210sft->boostpulse_fd;
     }
 
-    len = write(hikey->boostpulse_fd, "1", 1);
+    len = write(hi6210sft->boostpulse_fd, "1", 1);
     if (len < 0) {
         strerror_r(errno, buf, sizeof(buf));
         ALOGE("Error writing to %s: %s\n",
@@ -187,15 +187,15 @@ static int interactive_boostpulse(struct hikey_power_module *hikey)
 
 /*[schedtune functions]*******************************************************/
 
-int schedtune_sysfs_boost(struct hikey_power_module *hikey, char* booststr)
+int schedtune_sysfs_boost(struct hi6210sft_power_module *hi6210sft, char* booststr)
 {
     char buf[80];
     int len;
 
-    if (hikey->schedtune_boost_fd < 0)
-        return hikey->schedtune_boost_fd;
+    if (hi6210sft->schedtune_boost_fd < 0)
+        return hi6210sft->schedtune_boost_fd;
 
-    len = write(hikey->schedtune_boost_fd, booststr, 2);
+    len = write(hi6210sft->schedtune_boost_fd, booststr, 2);
     if (len < 0) {
         strerror_r(errno, buf, sizeof(buf));
         ALOGE("Error writing to %s: %s\n", SCHEDTUNE_BOOST_PATH, buf);
@@ -205,76 +205,76 @@ int schedtune_sysfs_boost(struct hikey_power_module *hikey, char* booststr)
 
 static void* schedtune_deboost_thread(void* arg)
 {
-    struct hikey_power_module *hikey = (struct hikey_power_module *)arg;
+    struct hi6210sft_power_module *hi6210sft = (struct hi6210sft_power_module *)arg;
 
     while(1) {
-        sem_wait(&hikey->signal_lock);
+        sem_wait(&hi6210sft->signal_lock);
         while(1) {
             long long now, sleeptime = 0;
 
-            pthread_mutex_lock(&hikey->lock);
+            pthread_mutex_lock(&hi6210sft->lock);
             now = gettime_ns();
-            if (hikey->deboost_time > now) {
-                sleeptime = hikey->deboost_time - now;
-                pthread_mutex_unlock(&hikey->lock);
+            if (hi6210sft->deboost_time > now) {
+                sleeptime = hi6210sft->deboost_time - now;
+                pthread_mutex_unlock(&hi6210sft->lock);
                 nanosleep_ns(sleeptime);
                 continue;
             }
 
-            schedtune_sysfs_boost(hikey, SCHEDTUNE_BOOST_NORM);
-            hikey->deboost_time = 0;
-            pthread_mutex_unlock(&hikey->lock);
+            schedtune_sysfs_boost(hi6210sft, SCHEDTUNE_BOOST_NORM);
+            hi6210sft->deboost_time = 0;
+            pthread_mutex_unlock(&hi6210sft->lock);
             break;
         }
     }
     return NULL;
 }
 
-static int schedtune_boost(struct hikey_power_module *hikey)
+static int schedtune_boost(struct hi6210sft_power_module *hi6210sft)
 {
     long long now;
 
-    if (hikey->schedtune_boost_fd < 0)
-        return hikey->schedtune_boost_fd;
+    if (hi6210sft->schedtune_boost_fd < 0)
+        return hi6210sft->schedtune_boost_fd;
 
     now = gettime_ns();
-    if (!hikey->deboost_time) {
-        schedtune_sysfs_boost(hikey, SCHEDTUNE_BOOST_INTERACTIVE);
-        sem_post(&hikey->signal_lock);
+    if (!hi6210sft->deboost_time) {
+        schedtune_sysfs_boost(hi6210sft, SCHEDTUNE_BOOST_INTERACTIVE);
+        sem_post(&hi6210sft->signal_lock);
     }
-    hikey->deboost_time = now + SCHEDTUNE_BOOST_TIME_NS;
+    hi6210sft->deboost_time = now + SCHEDTUNE_BOOST_TIME_NS;
 
     return 0;
 }
 
-static void schedtune_power_init(struct hikey_power_module *hikey)
+static void schedtune_power_init(struct hi6210sft_power_module *hi6210sft)
 {
     char buf[50];
     pthread_t tid;
 
 
-    hikey->deboost_time = 0;
-    sem_init(&hikey->signal_lock, 0, 1);
+    hi6210sft->deboost_time = 0;
+    sem_init(&hi6210sft->signal_lock, 0, 1);
 
-    hikey->schedtune_boost_fd = open(SCHEDTUNE_BOOST_PATH, O_WRONLY);
-    if (hikey->schedtune_boost_fd < 0) {
+    hi6210sft->schedtune_boost_fd = open(SCHEDTUNE_BOOST_PATH, O_WRONLY);
+    if (hi6210sft->schedtune_boost_fd < 0) {
         strerror_r(errno, buf, sizeof(buf));
         ALOGE("Error opening %s: %s\n", SCHEDTUNE_BOOST_PATH, buf);
     }
 
-    pthread_create(&tid, NULL, schedtune_deboost_thread, hikey);
+    pthread_create(&tid, NULL, schedtune_deboost_thread, hi6210sft);
 }
 
 /*[generic functions]*********************************************************/
-static void hikey_power_init(struct power_module __unused *module)
+static void hi6210sft_power_init(struct power_module __unused *module)
 {
-    struct hikey_power_module *hikey = container_of(module,
-                                              struct hikey_power_module, base);
-    interactive_power_init(hikey);
-    schedtune_power_init(hikey);
+    struct hi6210sft_power_module *hi6210sft = container_of(module,
+                                              struct hi6210sft_power_module, base);
+    interactive_power_init(hi6210sft);
+    schedtune_power_init(hi6210sft);
 }
 
-static void hikey_hint_interaction(struct hikey_power_module *mod)
+static void hi6210sft_hint_interaction(struct hi6210sft_power_module *mod)
 {
     /* Try interactive cpufreq boosting first */
     if(!interactive_boostpulse(mod))
@@ -284,16 +284,16 @@ static void hikey_hint_interaction(struct hikey_power_module *mod)
         return;
 }
 
-static void hikey_power_hint(struct power_module *module, power_hint_t hint,
+static void hi6210sft_power_hint(struct power_module *module, power_hint_t hint,
                                 void *data)
 {
-    struct hikey_power_module *hikey = container_of(module,
-                                              struct hikey_power_module, base);
+    struct hi6210sft_power_module *hi6210sft = container_of(module,
+                                              struct hi6210sft_power_module, base);
 
-    pthread_mutex_lock(&hikey->lock);
+    pthread_mutex_lock(&hi6210sft->lock);
     switch (hint) {
      case POWER_HINT_INTERACTION:
-        hikey_hint_interaction(hikey);
+        hi6210sft_hint_interaction(hi6210sft);
         break;
 
    case POWER_HINT_VSYNC:
@@ -311,13 +311,13 @@ static void hikey_power_hint(struct power_module *module, power_hint_t hint,
     default:
             break;
     }
-    pthread_mutex_unlock(&hikey->lock);
+    pthread_mutex_unlock(&hi6210sft->lock);
 }
 
 static void set_feature(struct power_module *module, feature_t feature, int state)
 {
-    struct hikey_power_module *hikey = container_of(module,
-                                              struct hikey_power_module, base);
+    struct hi6210sft_power_module *hi6210sft = container_of(module,
+                                              struct hi6210sft_power_module, base);
     switch (feature) {
     default:
         ALOGW("Error setting the feature, it doesn't exist %d\n", feature);
@@ -329,21 +329,21 @@ static struct hw_module_methods_t power_module_methods = {
     .open = NULL,
 };
 
-struct hikey_power_module HAL_MODULE_INFO_SYM = {
+struct hi6210sft_power_module HAL_MODULE_INFO_SYM = {
     base: {
         common: {
             tag: HARDWARE_MODULE_TAG,
             module_api_version: POWER_MODULE_API_VERSION_0_2,
             hal_api_version: HARDWARE_HAL_API_VERSION,
             id: POWER_HARDWARE_MODULE_ID,
-            name: "HiKey Power HAL",
+            name: "hi6210sft Power HAL",
             author: "The Android Open Source Project",
             methods: &power_module_methods,
         },
 
-        init: hikey_power_init,
+        init: hi6210sft_power_init,
         setInteractive: power_set_interactive,
-        powerHint: hikey_power_hint,
+        powerHint: hi6210sft_power_hint,
         setFeature: set_feature,
     },
 
