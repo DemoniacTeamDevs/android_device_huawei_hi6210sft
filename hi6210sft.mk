@@ -5,6 +5,16 @@ PRODUCT_NAME := cm_hi6210sft
 PRODUCT_DEVICE := hi6210sft
 PRODUCT_BRAND := hi6210sft
 
+# ADB
+PRODUCT_PROPERTY_OVERRIDES += \
+         debug.sf.no_hw_vsync=1 \
+	 	ro.adb.secure=0 \
+         ro.secure=0
+
+# AAPT
+PRODUCT_AAPT_CONFIG := xhdpi hdpi normal
+PRODUCT_AAPT_PREF_CONFIG := xhdpi
+
 # ART
 PRODUCT_RUNTIMES := runtime_libart_default
 
@@ -18,6 +28,13 @@ PRODUCT_PACKAGES += \
 	    audio.r_submix.default \
 	    audio.usb.default \
 	    tinyplay
+
+# Charac
+PRODUCT_CHARACTERISTICS := default
+
+# Charger
+PRODUCT_PACKAGES += \
+    	charger_res_images
 
 # Dalvik
 $(call inherit-product-if-exists, frameworks/native/build/tablet-10in-xhdpi-2048-dalvik-heap.mk)
