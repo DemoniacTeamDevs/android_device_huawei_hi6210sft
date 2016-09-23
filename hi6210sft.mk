@@ -94,12 +94,17 @@ PRODUCT_COPY_FILES += \
         $(LOCAL_PATH)/nfc/bcm2079x_pre_firmware.ncd:system/vendor/firmware/bcm2079x_pre_firmware.ncd
 
 PRODUCT_PACKAGES += \
+    	libnfc-nci \
+	libnfc_nci_jni \
     	NfcNci \
     	Tag \
     	com.android.nfc_extras \
 	nfc_nci.pn54x.default
 
+NFCEE_ACCESS_PATH := $(LOCAL_PATH)/nfc/nfcee_access.xml
+
 PRODUCT_COPY_FILES += \
+	$(NFCEE_ACCESS_PATH):system/etc/nfcee_access.xml \
     	frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
     	frameworks/native/data/etc/android.hardware.nfc.hce.xml:system/etc/permissions/android.hardware.nfc.hce.xml \
 	frameworks/native/data/etc/com.android.nfc_extras.xml:system/etc/permissions/com.android.nfc_extras.xml
