@@ -8,7 +8,7 @@ PRODUCT_BRAND := hi6210sft
 # ADB
 PRODUCT_PROPERTY_OVERRIDES += \
          debug.sf.no_hw_vsync=1 \
-	 	ro.adb.secure=0 \
+	 	 ro.adb.secure=0 \
          ro.secure=0
 
 # AAPT
@@ -99,6 +99,37 @@ PRODUCT_COPY_FILES +=  \
 
 # PowerHAL
 PRODUCT_PACKAGES += power.hi6210sft
+
+# Ramdisk
+PRODUCT_COPY_FILES +=  \
+        $(LOCAL_PATH)/ramdisk/fstab.hi6210sft:root/fstab.hi6210sft \
+        $(LOCAL_PATH)/ramdisk/init:root/init \
+        $(LOCAL_PATH)/ramdisk/init.5801.rc:root/init.5801.rc \
+        $(LOCAL_PATH)/ramdisk/init.6165.rc:root/init.6165.rc \
+        $(LOCAL_PATH)/ramdisk/init.10106.rc:root/init.10106.rc \
+        $(LOCAL_PATH)/ramdisk/init.51054.rc:root/init.51054.rc \
+        $(LOCAL_PATH)/ramdisk/init.102173.rc:root/init.102173.rc \
+        $(LOCAL_PATH)/ramdisk/init.142782.rc:root/init.142782.rc \
+        $(LOCAL_PATH)/ramdisk/init.audio.rc:root/init.audio.rc \
+        $(LOCAL_PATH)/ramdisk/init.chip.usb.rc:root/init.chip.usb.rc \
+        $(LOCAL_PATH)/ramdisk/init.connectivity.bcm43xx.rc:root/init.connectivity.bcm43xx.rc \
+        $(LOCAL_PATH)/ramdisk/init.connectivity.hi110x.rc:root/init.connectivity.hi110x.rc \
+        $(LOCAL_PATH)/ramdisk/init.connectivity.rc:root/init.connectivity.rc \
+        $(LOCAL_PATH)/ramdisk/init.device.rc:root/init.device.rc \
+        $(LOCAL_PATH)/ramdisk/init.extmodem.rc:root/init.extmodem.rc \
+        $(LOCAL_PATH)/ramdisk/init.hi6210sft.rc:root/init.hi6210sft.rc \
+        $(LOCAL_PATH)/ramdisk/init.hisi.rc:root/init.hisi.rc \
+        $(LOCAL_PATH)/ramdisk/init.rc:root/init.rc \
+        $(LOCAL_PATH)/ramdisk/init.recovery.hi6210sft.rc:root/init.recovery.hi6210sft.rc \
+        $(LOCAL_PATH)/ramdisk/ueventd.hi6210sft.rc:root/ueventd.hi6210sft.rc \
+
+PRODUCT_COPY_FILES +=  \
+        $(LOCAL_PATH)/ramdisk/sbin/check_root:root/sbin/check_root \
+        $(LOCAL_PATH)/ramdisk/sbin/emmc_partation:root/sbin/emmc_partation \
+        $(LOCAL_PATH)/ramdisk/sbin/kmsgcat:root/sbin/kmsgcat \
+        $(LOCAL_PATH)/ramdisk/sbin/ntfs-3gd:root/sbin/ntfs-3gd \
+        $(LOCAL_PATH)/ramdisk/sbin/oeminfo_nvm_server:root/sbin/oeminfo_nvm_server \
+        $(LOCAL_PATH)/ramdisk/sbin/teecd:root/sbin/teecd \
 
 # Wifi
 PRODUCT_PACKAGES += \
