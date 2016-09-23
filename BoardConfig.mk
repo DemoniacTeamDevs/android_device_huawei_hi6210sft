@@ -41,6 +41,7 @@ TARGET_USE_PAN_DISPLAY := true
 
 # Graphics
 ANDROID_ENABLE_RENDERSCRIPT := true
+GRALLOC_PATH := device/huawei/hi6210sft/gralloc
 TARGET_HARDWARE_3D := true
 USE_OPENGL_RENDERER := true
 WITH_DEXPREOPT ?= true
