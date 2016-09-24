@@ -22,7 +22,7 @@ AUDIO_FEATURE_ENABLED_NEW_SAMPLE_RATE := true
 AUDIO_FEATURE_LOW_LATENCY_PRIMARY := true
 BOARD_USES_ALSA_AUDIO := true
 BOARD_USES_GENERIC_AUDIO := false
-COMMON_GLOBAL_CFLAGS += -DHUAWEI_SOUND_PARAM_PATH=\"/system/etc\"
+COMMON_GLOBAL_CFLAGS += -DHUAWEI_SOUND_PARAM_PATH=\"/system/etc/audio\"
 
 # Blobs
 -include vendor/huawei/hi6210sft/BoardConfigVendor.mk
@@ -77,7 +77,8 @@ EXTENDED_FONT_FOOTPRINT 	:= true
 
 # Graphics
 ANDROID_ENABLE_RENDERSCRIPT 	:= true
-GRALLOC_PATH 			:= device/huawei/hi6210sft/gralloc
+BOARD_USES_DRM_HWCOMPOSER       := true
+GRALLOC_PATH 			:= hardware/hisi/display/gralloc
 TARGET_HARDWARE_3D 		:= true
 USE_OPENGL_RENDERER 		:= true
 
