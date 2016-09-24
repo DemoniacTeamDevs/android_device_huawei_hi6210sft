@@ -185,6 +185,15 @@ PRODUCT_COPY_FILES+= \
         $(LOCAL_PATH)/ramdisk/sbin/oeminfo_nvm_server:root/sbin/oeminfo_nvm_server \
         $(LOCAL_PATH)/ramdisk/sbin/teecd:root/sbin/teecd \
 
+# RIL
+PRODUCT_PROPERTY_OVERRIDES += \
+    audioril.lib=libhuawei-audio-ril.so \
+    ro.telephony.default_network=9 \
+    ro.telephony.ril_class=HuaweiRIL \
+    telephony.lteOnCdmaDevice=0 \
+    telephony.lteOnGsmDevice=1
+
+
 # USB
 PRODUCT_PACKAGES += \
  	com.android.future.usb.accessory
