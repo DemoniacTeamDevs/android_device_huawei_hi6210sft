@@ -98,7 +98,7 @@ PRODUCT_COPY_FILES += \
 
 # Lights
 PRODUCT_PACKAGES += \
-	lights.default
+	lights.hi6210sft
 
 # NFC
 PRODUCT_COPY_FILES += \
