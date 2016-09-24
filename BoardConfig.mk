@@ -95,6 +95,9 @@ BOARD_MKBOOTIMG_ARGS += --tags_offset "$(BOARD_TAGS_OFFSET)"
 
 TARGET_PREBUILT_KERNEL := device/huawei/hi6210sft/kernel
 
+# LibC
+BOARD_PROVIDES_ADDITIONAL_BIONIC_STATIC_LIBS += libc_huawei_symbols
+
 # NFC
 BOARD_NFC_CHIPSET := pn544
 BOARD_NFC_DEVICE := /dev/pn544
