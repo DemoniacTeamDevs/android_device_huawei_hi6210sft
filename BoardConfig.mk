@@ -77,8 +77,6 @@ EXTENDED_FONT_FOOTPRINT 	:= true
 
 # Graphics
 ANDROID_ENABLE_RENDERSCRIPT 	:= true
-BOARD_USES_DRM_HWCOMPOSER       := true
-GRALLOC_PATH 			:= hardware/hisi/display/gralloc
 TARGET_HARDWARE_3D 		:= true
 USE_OPENGL_RENDERER 		:= true
 
