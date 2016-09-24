@@ -62,6 +62,7 @@ $(call inherit-product, device/common/gps/gps_us_supl.mk)
 # Graphics
 PRODUCT_PACKAGES += \
 	gralloc.hi6210sft \
+	hwcomposer.hi6210sft \
 	libGLES_android \
 	libGLES_mali \
 	libion
