@@ -60,6 +60,18 @@ PRODUCT_PACKAGES += \
 $(call inherit-product, device/common/gps/gps_us_supl.mk)
 
 # Graphics
+PRODUCT_COPY_FILES += \
+        $(LOCAL_PATH)/graphics/lib/egl/libGLES_android.so:system/lib/egl/libGLES_android.so \
+        $(LOCAL_PATH)/graphics/lib/egl/libGLES_mali.so:system/lib/egl/libGLES_mali.so \
+        $(LOCAL_PATH)/graphics/lib/hw/gralloc.hi6210sft.so:system/lib/hw/gralloc.hi6210sft.so \
+        $(LOCAL_PATH)/graphics/lib/libion.so:system/lib/libion.so \
+
+PRODUCT_COPY_FILES += \
+        $(LOCAL_PATH)/graphics/lib64/egl/libGLES_android.so:system/lib64/egl/libGLES_android.so \
+        $(LOCAL_PATH)/graphics/lib64/egl/libGLES_mali.so:system/lib64/egl/libGLES_mali.so \
+        $(LOCAL_PATH)/graphics/lib64/hw/gralloc.hi6210sft.so:system/lib64/hw/gralloc.hi6210sft.so \
+        $(LOCAL_PATH)/graphics/lib64/libion.so:system/lib64/libion.so \
+
 PRODUCT_PACKAGES += \
 	gralloc.hi6210sft \
 	libGLES_android \
